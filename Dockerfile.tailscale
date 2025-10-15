@@ -7,6 +7,6 @@ RUN apt-get update && \
     curl -fsSL https://tailscale.com/install.sh | sh
 
 # تثبيت smtplib dependencies (Python)
-RUN pip3 install --no-cache-dir email-validator
+# RUN pip3 install --no-cache-dir email-validator
 
 CMD ["sleep", "infinity"]

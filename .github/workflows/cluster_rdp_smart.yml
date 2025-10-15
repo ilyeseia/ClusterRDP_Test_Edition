@@ -12,9 +12,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Build Tailscale Docker image
-      run: docker build -t ubuntu-tailscale -f Dockerfile.tailscale .
-
     - name: Ensure script permissions
       run: chmod +x scripts/*.sh
 
@@ -28,8 +25,11 @@ jobs:
         GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
       run: |
         echo "⏱ Starting VM creation sequence..."
+        # إنشاء أول VM مباشرة
         ./scripts/create_rdp_vm_smart.sh &
+        # إنشاء الثاني بعد 15 دقيقة
         sleep 900 && ./scripts/create_rdp_vm_smart.sh &
+        # إنشاء الثالث بعد 30 دقيقة إضافية
         sleep 1800 && ./scripts/create_rdp_vm_smart.sh &
         echo "✅ All VMs launched in smart sequence."
 

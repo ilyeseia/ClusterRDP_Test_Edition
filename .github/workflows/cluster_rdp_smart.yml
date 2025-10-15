@@ -1,0 +1,27 @@
+name: ClusterRDP Smart (Test Edition)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cluster-rdp-smart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Ensure script permissions
+      run: chmod +x scripts/*.sh
+
+    - name: Launch Smart Cluster
+      run: |
+        echo "⏱ Starting VM creation sequence..."
+        ./scripts/create_rdp_vm_smart.sh &
+        sleep 900 && ./scripts/create_rdp_vm_smart.sh &
+        sleep 1800 && ./scripts/create_rdp_vm_smart.sh &
+        echo "✅ All VMs launched in smart sequence."
+
+    - name: Monitor Cluster
+      run: ./scripts/monitor_cluster_smart.sh

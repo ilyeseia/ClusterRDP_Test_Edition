@@ -1,24 +1,31 @@
 #!/bin/bash
 set -e
+
 VM_NAME="RDP-VM$(date +%s | tail -c 2)"
-echo "ðŸš€ Creating $VM_NAME..."
-docker run -d --name $VM_NAME --hostname $VM_NAME ubuntu sleep infinity
-echo "ðŸ”— Starting Tailscale inside $VM_NAME..."
+echo "🚀 Creating $VM_NAME..."
+
+# تشغيل الحاوية من الصورة المخصصة
+docker run -d --name $VM_NAME --hostname $VM_NAME ubuntu-tailscale
+
+echo "🛡️ Starting Tailscale inside $VM_NAME..."
 docker exec -d $VM_NAME tailscaled
-docker exec -d $VM_NAME tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=$VM_NAME
+docker exec $VM_NAME tailscale up --authkey="${TAILSCALE_AUTH_KEY}" --hostname="$VM_NAME"
+
 TS_IP=$(docker exec $VM_NAME tailscale ip -4 | head -n1)
-echo "âœ… $VM_NAME created with Tailscale IP: $TS_IP"
+echo "✅ $VM_NAME created with Tailscale IP: $TS_IP"
 
 # Gmail notification
-echo "ðŸ“§ Sending Gmail notification..."
+echo "📧 Sending Gmail notification..."
 python3 - <<'PYCODE'
 import smtplib, ssl, os
 from email.mime.text import MIMEText
 
 user = os.getenv("GMAIL_USER")
 pwd = os.getenv("GMAIL_PASS")
-msg = MIMEText(f"Machine {os.getenv('VM_NAME','RDP-VM')} created successfully.")
-msg["Subject"] = "ðŸ–¥ï¸ RDP VM Created"
+vm_name = os.getenv("VM_NAME", "RDP-VM")
+
+msg = MIMEText(f"Machine {vm_name} created successfully.")
+msg["Subject"] = "🚀 RDP VM Created"
 msg["From"] = user
 msg["To"] = user
 

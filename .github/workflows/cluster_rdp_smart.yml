@@ -12,10 +12,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Build Tailscale Docker image
+      run: docker build -t ubuntu-tailscale -f Dockerfile.tailscale .
+
     - name: Ensure script permissions
       run: chmod +x scripts/*.sh
 
+    - name: List scripts for debugging
+      run: ls -l scripts/
+
     - name: Launch Smart Cluster
+      env:
+        TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
       run: |
         echo "⏱ Starting VM creation sequence..."
         ./scripts/create_rdp_vm_smart.sh &
@@ -24,4 +34,8 @@ jobs:
         echo "✅ All VMs launched in smart sequence."
 
     - name: Monitor Cluster
+      env:
+        TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
       run: ./scripts/monitor_cluster_smart.sh
